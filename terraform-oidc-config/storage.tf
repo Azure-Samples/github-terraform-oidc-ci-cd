@@ -1,5 +1,5 @@
 resource "azurerm_storage_account" "example" {
-  name                     = "${replace(var.prefix, "-", "")}tfstate"
+  name                     = "${lower(replace(var.prefix, "-", ""))}tfstate"
   resource_group_name      = azurerm_resource_group.state.name
   location                 = var.location
   account_tier             = "Standard"

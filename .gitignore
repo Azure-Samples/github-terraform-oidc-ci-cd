@@ -380,3 +380,5 @@ override.tf.json
 # example: *tfplan*
 *.terraform.lock.hcl
 
+terraform-oidc-config/config.tfvars
+terraform-oidc-config/log.txt
