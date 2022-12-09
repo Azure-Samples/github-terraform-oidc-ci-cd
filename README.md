@@ -100,6 +100,8 @@ github_organisation_target = "my-organization"
 1. Type `yes` and hit enter once you have reviewed the plan.
 1. Wait for the apply to complete.
 
+> NOTE: If you are a Microsoft employee you may get a 403 error here. If so, you need to grant your PAT SSO access to the Azure-Samples organisation. This does not affect non-Microsoft users.
+
 ### Check what has been created
 
 #### Service Principal
