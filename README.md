@@ -1,6 +1,7 @@
 ---
 page_type: sample
 languages:
+- terraform
 - hcl
 - yaml
 name: Using GitHub Actions OpenID Connect (OIDC) with Azure for Terraform Deployments
