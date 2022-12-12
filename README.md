@@ -3,8 +3,8 @@ page_type: sample
 languages:
 - hcl
 - yaml
-name: Using GitHub Actions OIDC with Azure for Terraform Deployments
-description: A sample showing how to configure GitHub OIDC connection to Azure with Terraform and then use that configuration to deploy resources with Terraform.
+name: Using GitHub Actions OpenID Connect (OIDC) with Azure for Terraform Deployments
+description: A sample showing how to configure GitHub OpenID Connect (OIDC) connection to Azure with Terraform and then use that configuration to deploy resources with Terraform.
 products:
 - azure
 - github
