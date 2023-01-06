@@ -75,7 +75,7 @@ The instructions for this sample are in the form of a Lab. Follow along with the
 
 1. Clone this repository to your local machine.
 1. Open the repo in Visual Studio Code. (Hint: In a terminal you can open Visual Studio Code by navigating to the folder and running `code .`).
-1. Navigate to the `terraform-oidc-config` folder and create a new file called `config.tfvars`.
+1. Navigate to the `terraform-oidc-config` folder and create a new file called `terraform.tfvars`.
 1. In the config file add the following:
 ``` 
 prefix = "<your_initials>-<date_as_YYYYMMDD>"
@@ -91,7 +91,7 @@ github_organisation_target = "my-organization"
 
 1. Open the Visual Studio Code Terminal and navigate the `terraform-oidc-config` folder.
 1. Run `az login` and follow the prompts to login to Azure with your Global Administrator account.
-1. Run `terraform apply -var-file="config.tfvars"`.
+1. Run `terraform apply`.
 1. You'll be prompted for the variable `var.github_token`. Paste in the PAT you generated earlier and hit enter.
 1. The plan will complete. Review the plan and see what is going to be created.
 1. Type `yes` and hit enter once you have reviewed the plan.
