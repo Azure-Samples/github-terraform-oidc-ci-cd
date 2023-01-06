@@ -147,7 +147,7 @@ github_organisation_target = "my-organization"
 
 ### Run the Action
 
-1. Select `Actions`, then click on the `Run Terraform with OpenID Connect` action in the lft menu.
+1. Select `Actions`, then click on the `Run Terraform with OpenID Connect` action in the left menu.
 1. Click the `Run workflow` drop-down and hit the `Run workflow` button.
 1. Wait for the run to appear or refresh the screen, then click on the run to see the details.
 1. You will see each environment being deployed one after the other. In a real world scenarios you may want to have a manual intervention on the environment for an approval to promote to the next stage.
