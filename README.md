@@ -49,11 +49,7 @@ This sample includes the following features:
 
 ### Installation
 
-(ideally very short)
-
-- npm install [package name]
-- mvn install
-- ...
+- Clone the repository locally and then follow the Demo / Lab.
 
 ### Quickstart
 
@@ -151,9 +147,6 @@ github_organisation_target = "my-organization"
 
 ### Run the Action
 
-1. Open github.com (login if you need to).
-1. Navigate to your organisation and select `Repositories`.
-1. You should see a newly created repository in there (e.g. `JFH-20221208-wild-dog`). Click on it.
 1. Select `Actions`, then click on the `Run Terraform with OpenID Connect` action in the lft menu.
 1. Click the `Run workflow` drop-down and hit the `Run workflow` button.
 1. Wait for the run to appear or refresh the screen, then click on the run to see the details.
