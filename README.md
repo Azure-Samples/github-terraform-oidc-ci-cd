@@ -32,7 +32,8 @@ This is a two part sample. The first part demonstrates how to configure Azure an
 
 This sample includes the following features:
 
-* Setup an Azure App Registration (Service Principal) ready for GitHub OIDC.
+* Option 1: Setup 3 Azure User Assigned Managed Identities with Federation ready for GitHub OIDC.
+* Option 2: Setup 3 Azure App Registrations (Service Principals) with Federation ready for GitHub OIDC.
 * Setup an Azure Storage Account for State file management.
 * Setup GitHub repository and environments ready to deploy Terraform with OIDC.
 * Run a Continuous Delivery pipeline for Terraform using OIDC auth for state and deploying resources to Azure.
@@ -87,6 +88,12 @@ prefix = "JFH-20221208"
 github_organisation_target = "my-organization"
 ```
 
+NOTE if you wish to use the Azure Active Directory Service Principal approach rather than a User Assigned Managed Identity, then also add this setting to `terraform.tfvars`:
+
+```
+use_managed_identity = false
+```
+
 ### Apply the Terraform
 
 1. Open the Visual Studio Code Terminal and navigate the `terraform-oidc-config` folder.
@@ -101,7 +108,21 @@ github_organisation_target = "my-organization"
 
 ### Check what has been created
 
-#### Service Principal
+#### Service Principal or Managed Identity
+
+There are two approaches shown in the code for federating GitHub and Azure. The preferred method is to use a User Assigned Managed Identity since this does not require elevated permissions in Azure Active Directory and has a longer token timeout. However the code also shows the Service Principal approach for those that prefer that method. These two cannot both be configured at once since only one matching audience is allowed per tenant. If you choose the Service Principal approach then the account creating the infrastructure will need permission to create Applications in Azure Active Directory.
+
+##### Option 1: Managed Identity
+
+1. Login to the [Azure Portal](https://portal.azure.com) with your Global Administrator account.
+1. Navigate to your Subscription and select `Resource groups`.
+1. Click the resource group post-fixed `dev` (e.g. `JFH-20221208-dev`).
+1. Look for a `Managed Identity` resource and click it.
+1. Click on `Federated Credentials`.
+1. There should only be one credential in the list, select that and take a look at the configuration.
+1. Examine the `Subject identifier` and ensure you understand how it is built up.
+
+##### Option 2: Service Principal
 
 1. Login to the [Azure Portal](https://portal.azure.com) with your Global Administrator account.
 1. Navigate to `Azure Active Directory` and select `App registrations`.

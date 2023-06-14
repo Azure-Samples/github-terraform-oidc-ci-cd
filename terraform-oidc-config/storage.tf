@@ -17,12 +17,12 @@ resource "azurerm_role_assignment" "storage_container" {
   for_each             = { for env in var.environments : env => env }
   scope                = azurerm_storage_container.example[each.value].resource_manager_id
   role_definition_name = "Storage Blob Data Contributor"
-  principal_id         = azuread_service_principal.github_oidc[each.value].id
+  principal_id         = var.use_managed_identity ? azurerm_user_assigned_identity.example[each.value].principal_id : azuread_service_principal.github_oidc[each.value].id
 }
 
 resource "azurerm_role_assignment" "storage_keys" {
   for_each             = { for env in var.environments : env => env }
   scope                = azurerm_storage_account.example.id
   role_definition_name = "Storage Account Key Operator Service Role"
-  principal_id         = azuread_service_principal.github_oidc[each.value].id
+  principal_id         = var.use_managed_identity ? azurerm_user_assigned_identity.example[each.value].principal_id : azuread_service_principal.github_oidc[each.value].id
 }

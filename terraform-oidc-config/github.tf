@@ -24,7 +24,7 @@ resource "github_actions_environment_secret" "azure_client_id" {
   repository      = github_repository.example.name
   environment     = github_repository_environment.example[each.value].environment
   secret_name     = "AZURE_CLIENT_ID"
-  plaintext_value = azuread_application.github_oidc[each.value].application_id
+  plaintext_value = var.use_managed_identity ? azurerm_user_assigned_identity.example[each.value].client_id : azuread_application.github_oidc[each.value].application_id
 }
 
 resource "github_actions_environment_secret" "azure_subscription_id" {

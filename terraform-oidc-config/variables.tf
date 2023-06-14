@@ -32,3 +32,9 @@ variable "environments" {
   type    = list(string)
   default = ["dev", "test", "prod"]
 }
+
+variable "use_managed_identity" {
+  type    = bool
+  default = true
+  description = "If selected, this option will create and configure a user assigned managed identity in the subscription instead of an AzureAD service principal."
+}
