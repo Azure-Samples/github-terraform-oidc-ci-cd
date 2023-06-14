@@ -39,6 +39,10 @@ This sample includes the following features:
 * Run a Continuous Delivery pipeline for Terraform using OIDC auth for state and deploying resources to Azure.
 * Run a Pull Request workflow with some basic static analysis.
 
+### Service Principal or Managed Identity
+
+There are two approaches shown in the code for federating GitHub and Azure. The preferred method is to use a User Assigned Managed Identity since this does not require elevated permissions in Azure Active Directory and has a longer token timeout. However the code also shows the Service Principal approach for those that prefer that method. If you choose the Service Principal approach then the account creating the infrastructure will need permission to create Applications in Azure Active Directory.
+
 ## Getting Started
 
 ### Prerequisites
@@ -88,7 +92,7 @@ prefix = "JFH-20221208"
 github_organisation_target = "my-organization"
 ```
 
-NOTE if you wish to use the Azure Active Directory Service Principal approach rather than a User Assigned Managed Identity, then also add this setting to `terraform.tfvars`:
+> NOTE if you wish to use the Azure Active Directory Service Principal approach rather than a User Assigned Managed Identity, then also add this setting to `terraform.tfvars`:
 
 ```
 use_managed_identity = false
@@ -108,9 +112,9 @@ use_managed_identity = false
 
 ### Check what has been created
 
-#### Service Principal or Managed Identity
+#### Managed Identity or Service Principal
 
-There are two approaches shown in the code for federating GitHub and Azure. The preferred method is to use a User Assigned Managed Identity since this does not require elevated permissions in Azure Active Directory and has a longer token timeout. However the code also shows the Service Principal approach for those that prefer that method. These two cannot both be configured at once since only one matching audience is allowed per tenant. If you choose the Service Principal approach then the account creating the infrastructure will need permission to create Applications in Azure Active Directory.
+When deploying the example you will have selected to use the default Managed Identity approach or the Service Principal approach choose the relevant option below.
 
 ##### Option 1: Managed Identity
 
