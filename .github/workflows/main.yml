@@ -90,7 +90,7 @@ jobs:
       run: exit 1
 
   deploy-to-dev:
-    if: github.event_name != 'pull_request'
+    if: github.event_name != 'pull_request' && contains(toJson(github.event.commits), 'Initial commit') == false
     defaults:
       run:
         working-directory: terraform-example-deploy
