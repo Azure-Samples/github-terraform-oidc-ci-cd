@@ -1,14 +1,14 @@
 ---
 page_type: sample
 languages:
-- terraform
-- hcl
-- yaml
+    - terraform
+    - hcl
+    - yaml
 name: Using GitHub Actions OpenID Connect (OIDC) with Azure for Terraform Deployments
 description: A sample showing how to configure GitHub OpenID Connect (OIDC) connection to Azure with Terraform and then use that configuration to deploy resources with Terraform.
 products:
-- azure
-- github
+    - azure
+    - github
 urlFragment: github-terraform-oidc-ci-cd
 ---
 
@@ -18,26 +18,26 @@ This is a two part sample. The first part demonstrates how to configure Azure an
 
 ## Content
 
-| File/folder | Description |
-|-------------|-------------|
-| `terraform-example-deploy`       | Some Terraform with Azure Resources for the demo to deploy. |
-| `terraform-oidc-config` | The Terraform to configure Azure and GitHub ready for OIDC authenticaton. |
-| `.gitignore` | Define what to ignore at commit time. |
-| `CHANGELOG.md` | List of changes to the sample. |
-| `CONTRIBUTING.md` | Guidelines for contributing to the sample. |
-| `README.md` | This README file. |
-| `LICENSE.md` | The license for the sample. |
+| File/folder                | Description                                                               |
+| -------------------------- | ------------------------------------------------------------------------- |
+| `terraform-example-deploy` | Some Terraform with Azure Resources for the demo to deploy.               |
+| `terraform-oidc-config`    | The Terraform to configure Azure and GitHub ready for OIDC authenticaton. |
+| `.gitignore`               | Define what to ignore at commit time.                                     |
+| `CHANGELOG.md`             | List of changes to the sample.                                            |
+| `CONTRIBUTING.md`          | Guidelines for contributing to the sample.                                |
+| `README.md`                | This README file.                                                         |
+| `LICENSE.md`               | The license for the sample.                                               |
 
 ## Features
 
 This sample includes the following features:
 
-* Option 1: Setup 3 Azure User Assigned Managed Identities with Federation ready for GitHub OIDC.
-* Option 2: Setup 3 Azure App Registrations (Service Principals) with Federation ready for GitHub OIDC.
-* Setup an Azure Storage Account for State file management.
-* Setup GitHub repository and environments ready to deploy Terraform with OIDC.
-* Run a Continuous Delivery pipeline for Terraform using OIDC auth for state and deploying resources to Azure.
-* Run a Pull Request workflow with some basic static analysis.
+-   Option 1: Setup 3 Azure User Assigned Managed Identities with Federation ready for GitHub OIDC.
+-   Option 2: Setup 3 Azure App Registrations (Service Principals) with Federation ready for GitHub OIDC.
+-   Setup an Azure Storage Account for State file management.
+-   Setup GitHub repository and environments ready to deploy Terraform with OIDC.
+-   Run a Continuous Delivery pipeline for Terraform using OIDC auth for state and deploying resources to Azure.
+-   Run a Pull Request workflow with some basic static analysis.
 
 ### Service Principal or Managed Identity
 
@@ -47,14 +47,14 @@ There are two approaches shown in the code for federating GitHub and Azure. The 
 
 ### Prerequisites
 
-- HashiCorp Terraform CLI: [Download](https://www.terraform.io/downloads)
-- Azure CLI: [Download](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-windows?tabs=azure-cli#install-or-update)
-- An Azure Subscription: [Free Account](https://azure.microsoft.com/en-gb/free/search/)
-- A GitHub Organization: [Free Organization](https://github.com/organizations/plan)
+-   HashiCorp Terraform CLI: [Download](https://www.terraform.io/downloads)
+-   Azure CLI: [Download](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-windows?tabs=azure-cli#install-or-update)
+-   An Azure Subscription: [Free Account](https://azure.microsoft.com/en-gb/free/search/)
+-   A GitHub Organization: [Free Organization](https://github.com/organizations/plan)
 
 ### Installation
 
-- Clone the repository locally and then follow the Demo / Lab.
+-   Clone the repository locally and then follow the Demo / Lab.
 
 ### Quickstart
 
@@ -71,8 +71,8 @@ The instructions for this sample are in the form of a Lab. Follow along with the
 1. Click `Generate new token` and select the `classic` option.
 1. Type `Demo_OIDC` into the `Note` field.
 1. Check these scopes:
-   1. `repo`
-   1. `delete_repo`
+    1. `repo`
+    1. `delete_repo`
 1. Click `Generate token`
 1. > IMPORTANT: Copy the token and save it somewhere.
 
@@ -82,11 +82,14 @@ The instructions for this sample are in the form of a Lab. Follow along with the
 1. Open the repo in Visual Studio Code. (Hint: In a terminal you can open Visual Studio Code by navigating to the folder and running `code .`).
 1. Navigate to the `terraform-oidc-config` folder and create a new file called `terraform.tfvars`.
 1. In the config file add the following:
-``` 
+
+```
 prefix = "<your_initials>-<date_as_YYYYMMDD>"
 github_organisation_target = "<your_github_organisation_name>"
 ```
+
 e.g.
+
 ```
 prefix = "JFH-20221208"
 github_organisation_target = "my-organization"
@@ -102,6 +105,7 @@ use_managed_identity = false
 
 1. Open the Visual Studio Code Terminal and navigate the `terraform-oidc-config` folder.
 1. Run `az login` and follow the prompts to login to Azure with your Global Administrator account.
+1. Run `terraform init`. This command initializes a Terraform working directory, downloading the necessary provider plugins and modules. It's crucial to run this before `terraform apply` to set up the backend, modules, and plugins required for your Terraform configuration.
 1. Run `terraform apply`.
 1. You'll be prompted for the variable `var.github_token`. Paste in the PAT you generated earlier and hit enter.
 1. The plan will complete. Review the plan and see what is going to be created.
@@ -181,6 +185,7 @@ When deploying the example you will have selected to use the default Managed Ide
 1. Run the workflow again and take a look at the log to compare what happens on the Day 2 run.
 
 ### Submit a PR
+
 1. Clone your new repository and open it in Visual Studio Code.
 1. Create a new branch, call it whatever you want.
 1. Open the `terraform-example-deploy/virtual-machine.tf` file.
@@ -196,7 +201,7 @@ When deploying the example you will have selected to use the default Managed Ide
 
 ## Resources
 
-- [Automate Terraform with GitHub Actions](https://developer.hashicorp.com/terraform/tutorials/automation/github-actions)
-- [Terraform azurerm provider OIDC configuration](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/service_principal_oidc)
-- [GitHub OIDC Docs](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-cloud-providers)
-- [Azure External Identity Docs](https://learn.microsoft.com/en-us/azure/active-directory/develop/workload-identity-federation-create-trust?pivots=identity-wif-apps-methods-azp)
+-   [Automate Terraform with GitHub Actions](https://developer.hashicorp.com/terraform/tutorials/automation/github-actions)
+-   [Terraform azurerm provider OIDC configuration](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/service_principal_oidc)
+-   [GitHub OIDC Docs](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-cloud-providers)
+-   [Azure External Identity Docs](https://learn.microsoft.com/en-us/azure/active-directory/develop/workload-identity-federation-create-trust?pivots=identity-wif-apps-methods-azp)
