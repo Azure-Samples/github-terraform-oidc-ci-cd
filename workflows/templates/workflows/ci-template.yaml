@@ -99,6 +99,7 @@ jobs:
           terraform `
           -chdir="$${{inputs.root_module_folder_relative_path}}" `
           plan `
+          -out=tfplan `
           -input=false
 
       - name: Terraform Plan Summary
