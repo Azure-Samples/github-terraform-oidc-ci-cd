@@ -13,6 +13,7 @@ jobs:
     name: Validate Terraform
     runs-on:
       ${environments[keys(environments)[0]].runner_name}
+    environment: ${environments[keys(environments)[0]].environment_name_plan}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -87,7 +88,7 @@ jobs:
       - name: Terraform Plan
         shell: pwsh
         run: |
-          $additionalVariables = ConvertFrom-Json '$${{ inputs.additionalVariables }}'
+          $additionalVariables = ConvertFrom-Json '$${{ vars.ADDITIONAL_ENVIRONMENT_VARIABLES }}'
           foreach($var in $additionalVariables.PSObject.Properties) {
             if($var.Name.StartsWith("TF_VAR_")) {
               Write-Host "Setting: $($var.Name) = $($var.Value)"

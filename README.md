@@ -72,6 +72,10 @@ The instructions for this sample are in the form of a Lab. Follow along with the
 1. Type `Demo_OIDC` into the `Note` field.
 1. Check these scopes:
    1. `repo`
+   1. `workflow`
+   1. `admin:org`
+   1. `user`: `read:user`
+   1. `user`: `user:email`
    1. `delete_repo`
 1. Click `Generate token`
 1. > IMPORTANT: Copy the token and save it somewhere.

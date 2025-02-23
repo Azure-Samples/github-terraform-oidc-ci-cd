@@ -21,7 +21,7 @@ jobs:
   ${environment.name}_plan:
     name: Plan with Terraform
     ${environment.dependent_environment == "" ? "" : "needs: ${environment.dependent_environment}_apply"}
-    condition: $${{ inputs.environment == 'All' || inputs.environment == '${environment.name}' }}
+    if: $${{ inputs.environment == 'All' || inputs.environment == '${environment.name}' }}
     runs-on:
       ${environment.runner_name}
     concurrency: ${environment.backend_azure_storage_account_container_name}
@@ -57,8 +57,9 @@ jobs:
           -backend-config="key=terraform.tfstate"
 
       - name: Terraform Plan for $${{ inputs.terraform_action == 'destroy' && 'Destroy' || 'Apply' }}
+        shell: pwsh
         run: |
-          $additionalVariables = ConvertFrom-Json '$${{ inputs.additionalVariables }}'
+          $additionalVariables = ConvertFrom-Json '$${{ vars.ADDITIONAL_ENVIRONMENT_VARIABLES }}'
           foreach($var in $additionalVariables.PSObject.Properties) {
             if($var.Name.StartsWith("TF_VAR_")) {
               Write-Host "Setting: $($var.Name) = $($var.Value)"
@@ -74,6 +75,7 @@ jobs:
           $${{ inputs.terraform_action == 'destroy' && '-destroy' || '' }}
 
       - name: Create Module Artifact
+        shell: pwsh
         run: |
           $stagingDirectory = "staging"
           $rootModuleFolder = "$${{inputs.root_module_folder_relative_path}}"
@@ -84,8 +86,6 @@ jobs:
           if(Test-Path -Path $rootModuleFolderTerraformFolder) {
             Remove-Item -Path $rootModuleFolderTerraformFolder -Recurse -Force
           }
-
-        shell: pwsh
 
       - name: Publish Module Artifact
         uses: actions/upload-artifact@v4
@@ -104,7 +104,7 @@ jobs:
   ${environment.name}_apply:
     name: Apply with Terraform
     needs: ${environment.name}_plan
-    condition: $${{ inputs.environment == 'All' || inputs.environment == '${environment.name}' }}
+    if: $${{ inputs.environment == 'All' || inputs.environment == '${environment.name}' }}
     runs-on:
       ${environment.runner_name}
     concurrency: ${environment.backend_azure_storage_account_container_name}

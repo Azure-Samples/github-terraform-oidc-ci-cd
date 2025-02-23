@@ -1,5 +1,5 @@
 ---
-name: 02 Azure Landing Zones Continuous Delivery
+name: 02 Continuous Delivery
 on:
   push:
     branches:
@@ -35,3 +35,4 @@ jobs:
     with:
       terraform_action: $${{ inputs.terraform_action }}
       root_module_folder_relative_path: '${root_module_folder_relative_path}'
+      environment: $${{ inputs.environment }}

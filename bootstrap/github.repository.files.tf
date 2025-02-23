@@ -26,8 +26,8 @@ locals {
     environments                     = local.environment_replacements
     organization_name                = var.organization_name
     repository_name_templates        = github_repository.template.name
-    cd_template_path                 = "cd-template.yaml"
-    ci_template_path                 = "ci-template.yaml"
+    cd_template_path                 = ".github/workflows/cd-template.yaml"
+    ci_template_path                 = ".github/workflows/ci-template.yaml"
     root_module_folder_relative_path = "."
   }
 
@@ -63,7 +63,7 @@ resource "github_repository_file" "this" {
 
 resource "github_repository_file" "template" {
   for_each            = local.pipeline_template_files
-  repository          = github_repository.this.name
+  repository          = github_repository.template.name
   file                = each.key
   content             = each.value.content
   commit_author       = local.default_commit_email
