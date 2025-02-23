@@ -14,6 +14,8 @@ module "azure_devops_agents" {
   version_control_system_personal_access_token  = var.personal_access_token
   version_control_system_organization           = var.organization_name
   version_control_system_repository             = github_repository.this.name
+  version_control_system_runner_group           = var.use_runner_group ? github_actions_runner_group.this[0].name : null
+  version_control_system_runner_scope           = var.use_runner_group ? "org" : "repo"
   virtual_network_creation_enabled              = false
   virtual_network_id                            = module.virtual_network[0].resource_id
   container_app_subnet_id                       = module.virtual_network[0].subnets["agents"].resource_id

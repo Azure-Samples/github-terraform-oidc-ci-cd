@@ -13,7 +13,6 @@ jobs:
     name: Validate Terraform
     runs-on:
       ${environments[keys(environments)[0]].runner_name}
-    environment: ${environment_name_plan}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -123,6 +122,6 @@ jobs:
       - name: Publish Plan Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: 'plan_${environment.environment_name}'
+          name: 'plan_${environment.name}'
           path: ./tfplan.json
 %{ endfor ~}

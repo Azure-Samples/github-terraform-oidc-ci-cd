@@ -7,11 +7,13 @@ locals {
   target_folder_name = ".github"
 
   environment_replacements = { for environment_key, environment_value in var.environments : "${format("%03s", environment_value.display_order)}-${environment_key}" => {
-    name                  = lower(replace(environment_key, "-", ""))
-    display_name          = environment_value.display_name
-    runner_name           = var.use_self_hosted_agents ? local.self_hosted_runner_name : "ubuntu-latest"
-    environment_name      = environment_key
-    dependent_environment = environment_value.dependent_environment
+    name                                         = lower(replace(environment_key, "-", ""))
+    display_name                                 = environment_value.display_name
+    runner_name                                  = var.use_self_hosted_agents ? local.self_hosted_runner_name : "ubuntu-latest"
+    environment_name_plan                        = "${environment_key}-plan"
+    environment_name_apply                       = "${environment_key}-apply"
+    dependent_environment                        = environment_value.dependent_environment
+    backend_azure_storage_account_container_name = environment_key
   } }
 
   template_folder = "${path.module}/${var.example_module_path}"
@@ -29,7 +31,7 @@ locals {
     root_module_folder_relative_path = "."
   }
 
-  pipeline_main_folder = "${path.module}/../pipelines/main"
+  pipeline_main_folder = "${path.module}/../workflows/main"
   pipeline_main_files = { for file in fileset(local.pipeline_main_folder, "**") : "${local.target_folder_name}/${file}" => {
     name    = file
     content = templatefile("${local.pipeline_main_folder}/${file}", local.pipeline_main_replacements)
@@ -41,7 +43,7 @@ locals {
     environments = local.environment_replacements
   }
 
-  pipeline_template_folder = "${path.module}/../pipelines/templates"
+  pipeline_template_folder = "${path.module}/../workflows/templates"
   pipeline_template_files = { for file in fileset(local.pipeline_template_folder, "**") : "${local.target_folder_name}/${file}" => {
     name    = file
     content = templatefile("${local.pipeline_template_folder}/${file}", local.pipeline_template_replacements)

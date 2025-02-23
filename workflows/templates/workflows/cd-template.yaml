@@ -90,7 +90,7 @@ jobs:
       - name: Publish Module Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${environment.name}_module
+          name: module_${environment.name}
           path: ./staging/
 
       - name: Show the Plan for Review
@@ -124,7 +124,7 @@ jobs:
       - name: Download a Build Artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${environment.name}_module
+          name: module_${environment.name}
 
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v3
@@ -151,3 +151,4 @@ jobs:
           -input=false `
           -auto-approve `
           tfplan
+%{ endfor ~}
