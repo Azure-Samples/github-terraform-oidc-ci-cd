@@ -1,0 +1,128 @@
+---
+name: Continuous Integration
+on:
+  workflow_call:
+    inputs:
+      root_module_folder_relative_path:
+        description: 'Root Module Folder Relative Path'
+        default: '.'
+        type: string
+
+jobs:
+  validate:
+    name: Validate Terraform
+    runs-on:
+      ${environments[keys(environments)[0]].runner_name}
+    environment: ${environment_name_plan}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: Terraform Format Check
+        run: |
+          terraform \
+          -chdir="$${{inputs.root_module_folder_relative_path}}" \
+          fmt \
+          -check
+
+      - name: Terraform Init
+        run: |
+          terraform \
+          -chdir="$${{inputs.root_module_folder_relative_path}}" \
+          init \
+          -backend=false
+
+      - name: Terraform Validate
+        run: |
+          terraform \
+          -chdir="$${{inputs.root_module_folder_relative_path}}" \
+          validate
+
+%{ for environment in environments ~}
+  ${environment.name}_plan:
+    name: Validate Terraform Plan
+    needs: validate
+    runs-on:
+      ${environment.runner_name}
+    concurrency: ${environment.backend_azure_storage_account_container_name}
+    environment: ${environment.environment_name_plan}
+    permissions:
+      # NOTE: When modifying the token subject claims and adding `environment`.
+      # If the `id-token` permission is granted at the workflow level
+      # and the workflow has at least one job that does not specify an environment
+      # then the action will fail with an internal error.
+      id-token: write
+      contents: read
+      pull-requests: write
+    env:
+      ARM_CLIENT_ID: "$${{ vars.AZURE_CLIENT_ID }}"
+      ARM_SUBSCRIPTION_ID: "$${{ vars.AZURE_SUBSCRIPTION_ID }}"
+      ARM_TENANT_ID: "$${{ vars.AZURE_TENANT_ID }}"
+      ARM_USE_AZUREAD: true
+      ARM_USE_OIDC: true
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: Terraform Init
+        shell: pwsh
+        run: |
+          terraform `
+          -chdir="$${{inputs.root_module_folder_relative_path}}" `
+          init `
+          -backend-config="resource_group_name=$${{vars.BACKEND_AZURE_RESOURCE_GROUP_NAME}}" `
+          -backend-config="storage_account_name=$${{vars.BACKEND_AZURE_STORAGE_ACCOUNT_NAME}}" `
+          -backend-config="container_name=$${{vars.BACKEND_AZURE_STORAGE_ACCOUNT_CONTAINER_NAME}}" `
+          -backend-config="key=terraform.tfstate"
+
+      - name: Terraform Plan
+        shell: pwsh
+        run: |
+          $additionalVariables = ConvertFrom-Json '$${{ inputs.additionalVariables }}'
+          foreach($var in $additionalVariables.PSObject.Properties) {
+            if($var.Name.StartsWith("TF_VAR_")) {
+              Write-Host "Setting: $($var.Name) = $($var.Value)"
+              [System.Environment]::SetEnvironmentVariable($var.Name, $var.Value)
+            }
+          }
+
+          terraform `
+          -chdir="$${{inputs.root_module_folder_relative_path}}" `
+          plan `
+          -input=false
+
+      - name: Terraform Plan Summary
+        shell: pwsh
+        run: |
+          terraform -chdir="$${{inputs.root_module_folder_relative_path}}" show -json tfplan > tfplan.json
+          $planJson = Get-Content -Raw tfplan.json
+          $planObject = ConvertFrom-Json $planJson -Depth 100
+
+          $items = @{}
+          foreach($change in $planObject.resource_changes) {
+            $key = [System.String]::Join("-", $change.change.actions)
+            if(!$items.ContainsKey($key)) {
+              $items[$key] = 0
+            }
+            $items[$key]++
+          }
+          
+          Write-Host "Plan Summary"
+          Write-Host (ConvertTo-Json $items -Depth 10)
+
+      - name: Publish Plan Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'plan_${environment.environment_name}'
+          path: ./tfplan.json
+%{ endfor ~}
