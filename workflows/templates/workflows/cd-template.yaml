@@ -19,9 +19,9 @@ on:
 jobs:
 %{ for environment in environments ~}
   ${environment.name}_plan:
-    name: Plan with Terraform
+    name: ${environment.display_name} - Plan with Terraform
     ${environment.dependent_environment == "" ? "" : "needs: ${environment.dependent_environment}_apply"}
-    if: $${{ inputs.environment == 'All' || inputs.environment == '${environment.name}' }}
+    if: ${environment.dependent_environment == "" ? "$${{ inputs.environment == 'All' || inputs.environment == '${environment.name}' }}" : "$${{ always() && (inputs.environment == 'All' || inputs.environment == '${environment.name}') && (needs.${environment.dependent_environment}_apply.result == 'success' || needs.${environment.dependent_environment}_apply.result == 'skipped') }}"}
     runs-on:
       ${environment.runner_name}
     concurrency: ${environment.backend_azure_storage_account_container_name}
@@ -102,9 +102,9 @@ jobs:
           tfplan
 
   ${environment.name}_apply:
-    name: Apply with Terraform
+    name: ${environment.display_name} - Apply with Terraform
     needs: ${environment.name}_plan
-    if: $${{ inputs.environment == 'All' || inputs.environment == '${environment.name}' }}
+    if: $${{ always() && (inputs.environment == 'All' || inputs.environment == '${environment.name}') && (needs.${environment.name}_plan.result == 'success' || needs.${environment.name}_plan.result == 'skipped') }}
     runs-on:
       ${environment.runner_name}
     concurrency: ${environment.backend_azure_storage_account_container_name}
@@ -151,4 +151,5 @@ jobs:
           -input=false `
           -auto-approve `
           tfplan
+
 %{ endfor ~}

@@ -45,7 +45,7 @@ jobs:
 
 %{ for environment in environments ~}
   ${environment.name}_plan:
-    name: Validate Terraform Plan
+    name: ${environment.display_name} - Validate Terraform Plan
     needs: validate
     runs-on:
       ${environment.runner_name}
