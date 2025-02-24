@@ -193,6 +193,12 @@ The bootstrap implements a number of best practices for Terraform in Azure DevOp
 1. You should see that the environment has 7 Environment variables. These secrets are all used in the Action for deploying Terraform.
 1. Click on the `prod-apply` environment and take a look at the approval settings.
 
+#### Azure DevOps Agent Pools (self hosted agents option only)
+
+1. Navigate to `Settings`.
+1. Click `Action` and then `Runners`.
+1. You should see 4 runners ready to accept runs. (You may not see any if you chose the Container Apps option, as they are created on demand).
+
 #### GitHub Actions
 
 1. Navigate to `Code`.
