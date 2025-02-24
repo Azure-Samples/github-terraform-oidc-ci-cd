@@ -26,9 +26,12 @@ on:
           - 'destroy'          
 
 jobs:
-  plan_and_apply:
+%{ for environment in environments ~}
+  ${environment.name}_plan_and_apply:
     uses: ${organization_name}/${repository_name_templates}/${cd_template_path}@main
-    name: 'CD'
+    name: ${environment.display_name}
+    ${environment.dependent_environment == "" ? "" : "needs: ${environment.dependent_environment}_plan_and_apply"}
+    if: ${environment.dependent_environment == "" ? "$${{ inputs.environment == 'All' || inputs.environment == '${environment.name}' }}" : "$${{ always() && (inputs.environment == 'All' || inputs.environment == '${environment.name}') && (needs.${environment.dependent_environment}_plan_and_apply.result == 'success' || needs.${environment.dependent_environment}_plan_and_apply.result == 'skipped') }}"}
     permissions:
       id-token: write
       contents: read
@@ -36,3 +39,12 @@ jobs:
       terraform_action: $${{ inputs.terraform_action }}
       root_module_folder_relative_path: '${root_module_folder_relative_path}'
       environment: $${{ inputs.environment || 'All' }}
+      name: ${environment.name}
+      display_name: ${environment.display_name}
+      runner_name: ${environment.runner_name}
+      environment_name_plan: ${environment.environment_name_plan}
+      environment_name_apply: ${environment.environment_name_apply}
+      dependent_environment: ${environment.dependent_environment}
+      backend_azure_storage_account_container_name: ${environment.backend_azure_storage_account_container_name}
+
+%{ endfor ~}

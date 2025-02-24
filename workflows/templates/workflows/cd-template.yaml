@@ -11,28 +11,53 @@ on:
         description: 'Environment to deploy to'
         default: 'All'
         type: string
+      name:
+        description: 'Environment Details'
+        type: string
+        default: ''
+      display_name:
+        description: 'Environment Display Name'
+        type: string
+        default: ''
+      runner_name:
+        description: 'Runner Name'
+        type: string
+        default: ''
+      environment_name_plan:
+        description: 'Environment Name Plan'
+        type: string
+        default: ''
+      environment_name_apply:
+        description: 'Environment Name Apply'
+        type: string
+        default: ''
+      dependent_environment:
+        description: 'Dependent Environment'
+        type: string
+        default: ''
+      backend_azure_storage_account_container_name:
+        description: 'Backend Azure Storage Account Container Name'
+        type: string
+        default: ''
       root_module_folder_relative_path:
         description: 'Root Module Folder Relative Path'
         default: '.'
         type: string
 
 jobs:
-%{ for environment in environments ~}
-  ${environment.name}_plan:
-    name: ${environment.display_name} - Plan with Terraform
-    ${environment.dependent_environment == "" ? "" : "needs: ${environment.dependent_environment}_apply"}
-    if: ${environment.dependent_environment == "" ? "$${{ inputs.environment == 'All' || inputs.environment == '${environment.name}' }}" : "$${{ always() && (inputs.environment == 'All' || inputs.environment == '${environment.name}') && (needs.${environment.dependent_environment}_apply.result == 'success' || needs.${environment.dependent_environment}_apply.result == 'skipped') }}"}
+  plan:
+    name: Plan with Terraform
     runs-on:
-      ${environment.runner_name}
-    concurrency: ${environment.backend_azure_storage_account_container_name}
-    environment: ${environment.environment_name_plan}
+      ${{ inputs.runner_name }}
+    concurrency: ${{ inputs.backend_azure_storage_account_container_name }}
+    environment: ${{ inputs.environment_name_plan }}
     permissions:
       id-token: write
       contents: read
     env:
-      ARM_CLIENT_ID: "$${{ vars.AZURE_CLIENT_ID }}"
-      ARM_SUBSCRIPTION_ID: "$${{ vars.AZURE_SUBSCRIPTION_ID }}"
-      ARM_TENANT_ID: "$${{ vars.AZURE_TENANT_ID }}"
+      ARM_CLIENT_ID: "${{ vars.AZURE_CLIENT_ID }}"
+      ARM_SUBSCRIPTION_ID: "${{ vars.AZURE_SUBSCRIPTION_ID }}"
+      ARM_TENANT_ID: "${{ vars.AZURE_TENANT_ID }}"
       ARM_USE_AZUREAD: true
       ARM_USE_OIDC: true
 
@@ -49,17 +74,17 @@ jobs:
         shell: pwsh
         run: |
           terraform `
-          -chdir="$${{inputs.root_module_folder_relative_path}}" `
+          -chdir="${{inputs.root_module_folder_relative_path}}" `
           init `
-          -backend-config="resource_group_name=$${{vars.BACKEND_AZURE_RESOURCE_GROUP_NAME}}" `
-          -backend-config="storage_account_name=$${{vars.BACKEND_AZURE_STORAGE_ACCOUNT_NAME}}" `
-          -backend-config="container_name=$${{vars.BACKEND_AZURE_STORAGE_ACCOUNT_CONTAINER_NAME}}" `
+          -backend-config="resource_group_name=${{vars.BACKEND_AZURE_RESOURCE_GROUP_NAME}}" `
+          -backend-config="storage_account_name=${{vars.BACKEND_AZURE_STORAGE_ACCOUNT_NAME}}" `
+          -backend-config="container_name=${{vars.BACKEND_AZURE_STORAGE_ACCOUNT_CONTAINER_NAME}}" `
           -backend-config="key=terraform.tfstate"
 
-      - name: Terraform Plan for $${{ inputs.terraform_action == 'destroy' && 'Destroy' || 'Apply' }}
+      - name: Terraform Plan for ${{ inputs.terraform_action == 'destroy' && 'Destroy' || 'Apply' }}
         shell: pwsh
         run: |
-          $additionalVariables = ConvertFrom-Json '$${{ vars.ADDITIONAL_ENVIRONMENT_VARIABLES }}'
+          $additionalVariables = ConvertFrom-Json '${{ vars.ADDITIONAL_ENVIRONMENT_VARIABLES }}'
           foreach($var in $additionalVariables.PSObject.Properties) {
             if($var.Name.StartsWith("TF_VAR_")) {
               Write-Host "Setting: $($var.Name) = $($var.Value)"
@@ -68,17 +93,17 @@ jobs:
           }
  
           terraform `
-          -chdir="$${{inputs.root_module_folder_relative_path}}" `
+          -chdir="${{inputs.root_module_folder_relative_path}}" `
           plan `
           -out=tfplan `
           -input=false `
-          $${{ inputs.terraform_action == 'destroy' && '-destroy' || '' }}
+          ${{ inputs.terraform_action == 'destroy' && '-destroy' || '' }}
 
       - name: Create Module Artifact
         shell: pwsh
         run: |
           $stagingDirectory = "staging"
-          $rootModuleFolder = "$${{inputs.root_module_folder_relative_path}}"
+          $rootModuleFolder = "${{inputs.root_module_folder_relative_path}}"
           New-Item -Path . -Name $stagingDirectory -ItemType "directory"
           Copy-Item -Path "./*" -Exclude @(".git", ".terraform", ".github",  $stagingDirectory) -Recurse -Destination "./$stagingDirectory"
 
@@ -90,32 +115,31 @@ jobs:
       - name: Publish Module Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: module_${environment.name}
+          name: module_${{ inputs.name }}
           path: ./staging/
 
       - name: Show the Plan for Review
         shell: pwsh
         run: |
           terraform `
-          -chdir="$${{inputs.root_module_folder_relative_path}}" `
+          -chdir="${{inputs.root_module_folder_relative_path}}" `
           show `
           tfplan
 
-  ${environment.name}_apply:
-    name: ${environment.display_name} - Apply with Terraform
-    needs: ${environment.name}_plan
-    if: $${{ always() && (inputs.environment == 'All' || inputs.environment == '${environment.name}') && (needs.${environment.name}_plan.result == 'success' || needs.${environment.name}_plan.result == 'skipped') }}
+  apply:
+    name: Apply with Terraform
+    needs: plan
     runs-on:
-      ${environment.runner_name}
-    concurrency: ${environment.backend_azure_storage_account_container_name}
-    environment: ${environment.environment_name_apply}
+      ${{ inputs.runner_name }}
+    concurrency: ${{ inputs.backend_azure_storage_account_container_name }}
+    environment: ${{ inputs.environment_name_apply }}
     permissions:
       id-token: write
       contents: read
     env:
-      ARM_CLIENT_ID: "$${{ vars.AZURE_CLIENT_ID }}"
-      ARM_SUBSCRIPTION_ID: "$${{ vars.AZURE_SUBSCRIPTION_ID }}"
-      ARM_TENANT_ID: "$${{ vars.AZURE_TENANT_ID }}"
+      ARM_CLIENT_ID: "${{ vars.AZURE_CLIENT_ID }}"
+      ARM_SUBSCRIPTION_ID: "${{ vars.AZURE_SUBSCRIPTION_ID }}"
+      ARM_TENANT_ID: "${{ vars.AZURE_TENANT_ID }}"
       ARM_USE_AZUREAD: true
       ARM_USE_OIDC: true
       AZAPI_RETRY_GET_AFTER_PUT_MAX_TIME: "60m"      
@@ -124,7 +148,7 @@ jobs:
       - name: Download a Build Artifact
         uses: actions/download-artifact@v4
         with:
-          name: module_${environment.name}
+          name: module_${{ inputs.name }}
 
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v3
@@ -135,21 +159,20 @@ jobs:
         shell: pwsh
         run: |
           terraform `
-          -chdir="$${{inputs.root_module_folder_relative_path}}" `
+          -chdir="${{inputs.root_module_folder_relative_path}}" `
           init `
-          -backend-config="resource_group_name=$${{vars.BACKEND_AZURE_RESOURCE_GROUP_NAME}}" `
-          -backend-config="storage_account_name=$${{vars.BACKEND_AZURE_STORAGE_ACCOUNT_NAME}}" `
-          -backend-config="container_name=$${{vars.BACKEND_AZURE_STORAGE_ACCOUNT_CONTAINER_NAME}}" `
+          -backend-config="resource_group_name=${{vars.BACKEND_AZURE_RESOURCE_GROUP_NAME}}" `
+          -backend-config="storage_account_name=${{vars.BACKEND_AZURE_STORAGE_ACCOUNT_NAME}}" `
+          -backend-config="container_name=${{vars.BACKEND_AZURE_STORAGE_ACCOUNT_CONTAINER_NAME}}" `
           -backend-config="key=terraform.tfstate"
 
-      - name: Terraform $${{ inputs.terraform_action == 'destroy' && 'Destroy' || 'Apply' }}
+      - name: Terraform ${{ inputs.terraform_action == 'destroy' && 'Destroy' || 'Apply' }}
         shell: pwsh
         run: |
           terraform `
-          -chdir="$${{inputs.root_module_folder_relative_path}}" `
+          -chdir="${{inputs.root_module_folder_relative_path}}" `
           apply `
           -input=false `
           -auto-approve `
           tfplan
 
-%{ endfor ~}
