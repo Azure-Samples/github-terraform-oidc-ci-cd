@@ -1,0 +1,38 @@
+---
+name: 02 Continuous Delivery
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Choose Environment'
+        required: true
+        default: 'All'
+        type: choice
+        options:
+          - 'All'
+%{ for environment in environments ~}
+          - ${environment.name}
+%{ endfor ~}          
+      terraform_action:
+        description: 'Terraform Action to perform'
+        required: true
+        default: 'apply'
+        type: choice
+        options:
+          - 'apply'
+          - 'destroy'          
+
+jobs:
+  plan_and_apply:
+    uses: ${organization_name}/${repository_name_templates}/${cd_template_path}@main
+    name: 'CD'
+    permissions:
+      id-token: write
+      contents: read
+    with:
+      terraform_action: $${{ inputs.terraform_action }}
+      root_module_folder_relative_path: '${root_module_folder_relative_path}'
+      environment: $${{ inputs.environment || 'All' }}

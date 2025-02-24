@@ -1,0 +1,155 @@
+---
+name: Continuous Delivery
+on:
+  workflow_call:
+    inputs:
+      terraform_action:
+        description: 'Terraform Action to perform'
+        default: 'apply'
+        type: string
+      environment:
+        description: 'Environment to deploy to'
+        default: 'All'
+        type: string
+      root_module_folder_relative_path:
+        description: 'Root Module Folder Relative Path'
+        default: '.'
+        type: string
+
+jobs:
+%{ for environment in environments ~}
+  ${environment.name}_plan:
+    name: ${environment.display_name} - Plan with Terraform
+    ${environment.dependent_environment == "" ? "" : "needs: ${environment.dependent_environment}_apply"}
+    if: ${environment.dependent_environment == "" ? "$${{ inputs.environment == 'All' || inputs.environment == '${environment.name}' }}" : "$${{ always() && (inputs.environment == 'All' || inputs.environment == '${environment.name}') && (needs.${environment.dependent_environment}_apply.result == 'success' || needs.${environment.dependent_environment}_apply.result == 'skipped') }}"}
+    runs-on:
+      ${environment.runner_name}
+    concurrency: ${environment.backend_azure_storage_account_container_name}
+    environment: ${environment.environment_name_plan}
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      ARM_CLIENT_ID: "$${{ vars.AZURE_CLIENT_ID }}"
+      ARM_SUBSCRIPTION_ID: "$${{ vars.AZURE_SUBSCRIPTION_ID }}"
+      ARM_TENANT_ID: "$${{ vars.AZURE_TENANT_ID }}"
+      ARM_USE_AZUREAD: true
+      ARM_USE_OIDC: true
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: Terraform Init
+        shell: pwsh
+        run: |
+          terraform `
+          -chdir="$${{inputs.root_module_folder_relative_path}}" `
+          init `
+          -backend-config="resource_group_name=$${{vars.BACKEND_AZURE_RESOURCE_GROUP_NAME}}" `
+          -backend-config="storage_account_name=$${{vars.BACKEND_AZURE_STORAGE_ACCOUNT_NAME}}" `
+          -backend-config="container_name=$${{vars.BACKEND_AZURE_STORAGE_ACCOUNT_CONTAINER_NAME}}" `
+          -backend-config="key=terraform.tfstate"
+
+      - name: Terraform Plan for $${{ inputs.terraform_action == 'destroy' && 'Destroy' || 'Apply' }}
+        shell: pwsh
+        run: |
+          $additionalVariables = ConvertFrom-Json '$${{ vars.ADDITIONAL_ENVIRONMENT_VARIABLES }}'
+          foreach($var in $additionalVariables.PSObject.Properties) {
+            if($var.Name.StartsWith("TF_VAR_")) {
+              Write-Host "Setting: $($var.Name) = $($var.Value)"
+              [System.Environment]::SetEnvironmentVariable($var.Name, $var.Value)
+            }
+          }
+ 
+          terraform `
+          -chdir="$${{inputs.root_module_folder_relative_path}}" `
+          plan `
+          -out=tfplan `
+          -input=false `
+          $${{ inputs.terraform_action == 'destroy' && '-destroy' || '' }}
+
+      - name: Create Module Artifact
+        shell: pwsh
+        run: |
+          $stagingDirectory = "staging"
+          $rootModuleFolder = "$${{inputs.root_module_folder_relative_path}}"
+          New-Item -Path . -Name $stagingDirectory -ItemType "directory"
+          Copy-Item -Path "./*" -Exclude @(".git", ".terraform", ".github",  $stagingDirectory) -Recurse -Destination "./$stagingDirectory"
+
+          $rootModuleFolderTerraformFolder = Join-Path -Path "./$stagingDirectory" -ChildPath $rootModuleFolder -AdditionalChildPath ".terraform"
+          if(Test-Path -Path $rootModuleFolderTerraformFolder) {
+            Remove-Item -Path $rootModuleFolderTerraformFolder -Recurse -Force
+          }
+
+      - name: Publish Module Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: module_${environment.name}
+          path: ./staging/
+
+      - name: Show the Plan for Review
+        shell: pwsh
+        run: |
+          terraform `
+          -chdir="$${{inputs.root_module_folder_relative_path}}" `
+          show `
+          tfplan
+
+  ${environment.name}_apply:
+    name: ${environment.display_name} - Apply with Terraform
+    needs: ${environment.name}_plan
+    if: $${{ always() && (inputs.environment == 'All' || inputs.environment == '${environment.name}') && (needs.${environment.name}_plan.result == 'success' || needs.${environment.name}_plan.result == 'skipped') }}
+    runs-on:
+      ${environment.runner_name}
+    concurrency: ${environment.backend_azure_storage_account_container_name}
+    environment: ${environment.environment_name_apply}
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      ARM_CLIENT_ID: "$${{ vars.AZURE_CLIENT_ID }}"
+      ARM_SUBSCRIPTION_ID: "$${{ vars.AZURE_SUBSCRIPTION_ID }}"
+      ARM_TENANT_ID: "$${{ vars.AZURE_TENANT_ID }}"
+      ARM_USE_AZUREAD: true
+      ARM_USE_OIDC: true
+      AZAPI_RETRY_GET_AFTER_PUT_MAX_TIME: "60m"      
+
+    steps:
+      - name: Download a Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: module_${environment.name}
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: Terraform Init
+        shell: pwsh
+        run: |
+          terraform `
+          -chdir="$${{inputs.root_module_folder_relative_path}}" `
+          init `
+          -backend-config="resource_group_name=$${{vars.BACKEND_AZURE_RESOURCE_GROUP_NAME}}" `
+          -backend-config="storage_account_name=$${{vars.BACKEND_AZURE_STORAGE_ACCOUNT_NAME}}" `
+          -backend-config="container_name=$${{vars.BACKEND_AZURE_STORAGE_ACCOUNT_CONTAINER_NAME}}" `
+          -backend-config="key=terraform.tfstate"
+
+      - name: Terraform $${{ inputs.terraform_action == 'destroy' && 'Destroy' || 'Apply' }}
+        shell: pwsh
+        run: |
+          terraform `
+          -chdir="$${{inputs.root_module_folder_relative_path}}" `
+          apply `
+          -input=false `
+          -auto-approve `
+          tfplan
+
+%{ endfor ~}
