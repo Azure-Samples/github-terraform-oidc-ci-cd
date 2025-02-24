@@ -46,7 +46,7 @@ locals {
   pipeline_template_folder = "${path.module}/../workflows/templates"
   pipeline_template_files = { for file in fileset(local.pipeline_template_folder, "**") : "${local.target_folder_name}/${file}" => {
     name    = file
-    content = templatefile("${local.pipeline_template_folder}/${file}", local.pipeline_template_replacements)
+    content = file("${local.pipeline_template_folder}/${file}")
   } }
 }
 

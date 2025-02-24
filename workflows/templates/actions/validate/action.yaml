@@ -1,0 +1,41 @@
+---
+name: Run Terraform Validate
+description: Run Terraform Validate
+inputs:
+  root_module_folder_relative_path:
+    description: 'Root Module Folder Relative Path'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Install Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_wrapper: false
+
+    - name: Terraform Format Check
+      shell: pwsh
+      run: |
+        terraform `
+        -chdir="${{inputs.root_module_folder_relative_path}}" `
+        fmt `
+        -check
+
+    - name: Terraform Init
+      shell: pwsh
+      run: |
+        terraform `
+        -chdir="${{inputs.root_module_folder_relative_path}}" `
+        init `
+        -backend=false
+
+    - name: Terraform Validate
+      shell: pwsh
+      run: |
+        terraform `
+        -chdir="${{inputs.root_module_folder_relative_path}}" `
+        validate
