@@ -31,14 +31,13 @@ jobs:
     uses: ${organization_name}/${repository_name_templates}/${cd_template_path}@main
     name: ${environment.display_name}
     ${environment.dependent_environment == "" ? "" : "needs: ${environment.dependent_environment}_plan_and_apply"}
-    if: ${environment.dependent_environment == "" ? "$${{ inputs.environment == 'All' || inputs.environment == '${environment.name}' }}" : "$${{ always() && (inputs.environment == 'All' || inputs.environment == '${environment.name}') && (needs.${environment.dependent_environment}_plan_and_apply.result == 'success' || needs.${environment.dependent_environment}_plan_and_apply.result == 'skipped') }}"}
+    if: ${environment.dependent_environment == "" ? "$${{ (inputs.environment || 'All') == 'All' || (inputs.environment || 'All') == '${environment.name}' }}" : "$${{ always() && ((inputs.environment || 'All') == 'All' || (inputs.environment || 'All') == '${environment.name}') && (needs.${environment.dependent_environment}_plan_and_apply.result == 'success' || needs.${environment.dependent_environment}_plan_and_apply.result == 'skipped') }}"}
     permissions:
       id-token: write
       contents: read
     with:
       terraform_action: $${{ inputs.terraform_action }}
       root_module_folder_relative_path: '${root_module_folder_relative_path}'
-      environment: $${{ inputs.environment || 'All' }}
       name: ${environment.name}
       display_name: ${environment.display_name}
       runner_name: ${environment.runner_name}

@@ -7,12 +7,32 @@ on:
   workflow_dispatch:
 
 jobs:
-  validate_and_plan:
+  validate:
+    name: Validate Terraform
+    runs-on:
+      ${environments[keys(environments)[0]].runner_name}
+    steps:
+      - name: Validate Terraform
+        uses: ${organization_name}/${repository_name_templates}/.github/actions/validate@main
+        with:
+          root_module_folder_relative_path: '${root_module_folder_relative_path}'
+
+%{ for environment in environments ~}
+  ${environment.name}_plan:
     uses: ${organization_name}/${repository_name_templates}/${ci_template_path}@main
-    name: 'CI'
+    name: ${environment.display_name}
+    needs: validate
     permissions:
       id-token: write
       contents: read
-      pull-requests: write
     with:
       root_module_folder_relative_path: '${root_module_folder_relative_path}'
+      name: ${environment.name}
+      display_name: ${environment.display_name}
+      runner_name: ${environment.runner_name}
+      environment_name_plan: ${environment.environment_name_plan}
+      environment_name_apply: ${environment.environment_name_apply}
+      dependent_environment: ${environment.dependent_environment}
+      backend_azure_storage_account_container_name: ${environment.backend_azure_storage_account_container_name}
+
+%{ endfor ~}

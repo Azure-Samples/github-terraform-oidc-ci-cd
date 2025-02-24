@@ -7,10 +7,6 @@ on:
         description: 'Terraform Action to perform'
         default: 'apply'
         type: string
-      environment:
-        description: 'Environment to deploy to'
-        default: 'All'
-        type: string
       name:
         description: 'Environment Details'
         type: string
