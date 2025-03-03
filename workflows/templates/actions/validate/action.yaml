@@ -5,6 +5,9 @@ inputs:
   root_module_folder_relative_path:
     description: 'Root Module Folder Relative Path'
     required: true
+  terraform_cli_version:
+    description: 'Terraform CLI Version'
+    required: true
 
 runs:
   using: "composite"
@@ -16,6 +19,7 @@ runs:
       uses: hashicorp/setup-terraform@v3
       with:
         terraform_wrapper: false
+        terraform_version: ${{ inputs.terraform_cli_versions }}
 
     - name: Terraform Format Check
       shell: pwsh

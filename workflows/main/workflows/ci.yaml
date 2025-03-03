@@ -5,6 +5,12 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      terraform_cli_version:
+        description: 'Terraform CLI Version'
+        required: true
+        default: 'latest'
+        type: string      
 
 jobs:
   validate:
@@ -16,6 +22,7 @@ jobs:
         uses: ${organization_name}/${repository_name_templates}/.github/actions/validate@main
         with:
           root_module_folder_relative_path: '${root_module_folder_relative_path}'
+          terraform_cli_version: $${{ inputs.terraform_cli_version }}
 
 %{ for environment in environments ~}
   ${environment.name}_plan:
@@ -34,5 +41,6 @@ jobs:
       environment_name_apply: ${environment.environment_name_apply}
       dependent_environment: ${environment.dependent_environment}
       backend_azure_storage_account_container_name: ${environment.backend_azure_storage_account_container_name}
+      terraform_cli_version: $${{ inputs.terraform_cli_version }}
 
 %{ endfor ~}

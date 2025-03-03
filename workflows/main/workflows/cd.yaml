@@ -23,7 +23,12 @@ on:
         type: choice
         options:
           - 'apply'
-          - 'destroy'          
+          - 'destroy'
+      terraform_cli_version:
+        description: 'Terraform CLI Version'
+        required: true
+        default: 'latest'
+        type: string      
 
 jobs:
 %{ for environment in environments ~}
@@ -45,5 +50,6 @@ jobs:
       environment_name_apply: ${environment.environment_name_apply}
       dependent_environment: ${environment.dependent_environment}
       backend_azure_storage_account_container_name: ${environment.backend_azure_storage_account_container_name}
+      terraform_cli_version: $${{ inputs.terraform_cli_version }}
 
 %{ endfor ~}
