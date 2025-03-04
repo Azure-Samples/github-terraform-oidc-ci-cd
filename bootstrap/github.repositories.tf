@@ -4,8 +4,8 @@ locals {
 }
 
 resource "github_repository" "this" {
-  name                 = local.repository_name
-  description          = local.repository_name
+  name                 = local.resource_names.repository_main_name
+  description          = local.resource_names.repository_main_name
   auto_init            = true
   visibility           = data.github_organization.this.plan == local.free_plan ? "public" : "private"
   allow_update_branch  = true
@@ -21,8 +21,8 @@ resource "github_actions_repository_oidc_subject_claim_customization_template" "
 }
 
 resource "github_repository" "template" {
-  name                 = local.repository_name_template
-  description          = local.repository_name_template
+  name                 = local.resource_names.repository_template_name
+  description          = local.resource_names.repository_template_name
   auto_init            = true
   visibility           = data.github_organization.this.plan == local.free_plan ? "public" : "private"
   allow_update_branch  = true

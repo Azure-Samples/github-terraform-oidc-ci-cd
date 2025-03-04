@@ -55,3 +55,11 @@ resource "github_actions_environment_variable" "additional_variables" {
     TF_VAR_resource_group_name = module.resource_group_environments[each.value.environment].name
   })
 }
+
+resource "github_actions_environment_variable" "var_file" {
+  for_each      = local.environment_split
+  repository    = github_repository.this.name
+  environment   = github_repository_environment.this[each.key].environment
+  variable_name = "VAR_FILE_PATH"
+  value         = "./config/${each.value.environment}.tfvars"
+}

@@ -92,11 +92,28 @@ jobs:
             }
           }
 
-          terraform `
-          -chdir="${{inputs.root_module_folder_relative_path}}" `
-          plan `
-          -out=tfplan `
-          -input=false
+          $varFilePath = "${{ vars.VAR_FILE_PATH }}"
+          $action = "${{ inputs.terraform_action }}"
+
+          # Run Terraform Plan
+          $command = "terraform"
+          $arguments = @()
+          $arguments += "-chdir=${{ inputs.root_module_folder_relative_path }}"
+          $arguments += "plan"
+
+          if($varFilePath -ne "") {
+            $arguments += "-var-file=$varFilePath"
+          }
+
+          $arguments += "-out=tfplan"
+          $arguments += "-input=false"
+
+          if ($action -eq 'destroy') {
+            $arguments += "-destroy"
+          }
+
+          Write-Host "Running: $command $arguments"
+          & $command $arguments
 
       - name: Terraform Plan Summary
         shell: pwsh

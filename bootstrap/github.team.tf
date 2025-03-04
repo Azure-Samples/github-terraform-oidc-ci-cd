@@ -3,7 +3,7 @@ locals {
 }
 
 resource "github_team" "this" {
-  name        = "team-${var.postfix}"
+  name        = local.resource_names.team_name
   description = "Approvers for the Landing Zone Terraform Apply"
   privacy     = "closed"
 }
