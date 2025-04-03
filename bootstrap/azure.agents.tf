@@ -23,5 +23,6 @@ module "azure_devops_agents" {
   container_app_subnet_id                       = module.virtual_network[0].subnets["agents"].resource_id
   container_instance_subnet_id                  = module.virtual_network[0].subnets["agents"].resource_id
   container_registry_private_endpoint_subnet_id = module.virtual_network[0].subnets["private_endpoints"].resource_id
+  container_instance_use_availability_zones     = false
   depends_on                                    = [github_repository_file.this]
 }
