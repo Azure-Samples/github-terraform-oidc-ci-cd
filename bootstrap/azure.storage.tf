@@ -24,6 +24,7 @@ module "storage_account" {
   account_tier                  = "Standard"
   account_replication_type      = "ZRS"
   public_network_access_enabled = !var.use_self_hosted_agents
+  network_rules                 = var.use_self_hosted_agents ? {} : null
 
   containers = { for env_key, env_value in local.environments : env_key => {
     name          = env_key
