@@ -22,14 +22,6 @@ resource "github_actions_environment_variable" "azure_tenant_id" {
   value         = data.azurerm_client_config.current.tenant_id
 }
 
-resource "github_actions_environment_variable" "backend_azure_resource_group_name" {
-  for_each      = local.environment_split
-  repository    = github_repository.this.name
-  environment   = github_repository_environment.this[each.key].environment
-  variable_name = "BACKEND_AZURE_RESOURCE_GROUP_NAME"
-  value         = module.resource_group["state"].name
-}
-
 resource "github_actions_environment_variable" "backend_azure_storage_account_name" {
   for_each      = local.environment_split
   repository    = github_repository.this.name
