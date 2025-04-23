@@ -3,7 +3,7 @@ locals {
     login = user.login
     email = user.email
   } if contains(values(var.approvers), user.email)]
-  invalid_approvers = setsubtract(values(var.approvers), local.approvers.*.email)
+  invalid_approvers = setsubtract(values(var.approvers), local.approvers[*].email)
 }
 
 resource "github_team" "this" {
