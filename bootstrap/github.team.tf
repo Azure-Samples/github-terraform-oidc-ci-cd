@@ -10,13 +10,6 @@ resource "github_team" "this" {
   name        = local.resource_names.team_name
   description = "Approvers for the Landing Zone Terraform Apply"
   privacy     = "closed"
-}
-
-resource "github_team_membership" "this" {
-  for_each = { for approver in local.approvers : approver.login => approver }
-  team_id  = github_team.this.id
-  username = each.value.login
-  role     = "member"
 
   lifecycle {
     precondition {
@@ -24,6 +17,13 @@ resource "github_team_membership" "this" {
       error_message = "At least one approver has not been supplied with a valid email. Invalid approvers: ${join(", ", local.invalid_approvers)}"
     }
   }
+}
+
+resource "github_team_membership" "this" {
+  for_each = { for approver in local.approvers : approver.login => approver }
+  team_id  = github_team.this.id
+  username = each.value.login
+  role     = "member"
 }
 
 resource "github_team_repository" "this" {
