@@ -128,7 +128,7 @@ jobs:
     needs: deploy-to-dev
     defaults:
       run:
-        working-directory: terraform-example-deploy
+        working-directory: example-module
       
     name: Deploy to Test
     environment: test
