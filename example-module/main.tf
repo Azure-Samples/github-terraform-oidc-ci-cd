@@ -12,7 +12,7 @@ module "virtual_network" {
   version = "0.8.1"
 
   resource_group_name = local.resource_group_name
-  location = var.location
+  location            = var.location
   name                = local.resource_names.virtual_network_name
   subnets             = var.virtual_network_subnets
   address_space       = var.virtual_network_address_space
