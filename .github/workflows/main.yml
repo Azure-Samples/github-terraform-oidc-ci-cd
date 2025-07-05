@@ -18,7 +18,7 @@ jobs:
     if: github.event_name == 'pull_request'
     defaults:
       run:
-        working-directory: terraform-example-deploy
+        working-directory: example-module
     name: Analyse the Terraform
     environment: dev
     runs-on: ubuntu-latest
@@ -95,7 +95,7 @@ jobs:
     if: github.event_name != 'pull_request' && contains(toJson(github.event.commits), 'Initial commit') == false
     defaults:
       run:
-        working-directory: terraform-example-deploy
+        working-directory: example-module
       
     name: Deploy to Dev
     environment: dev
@@ -161,7 +161,7 @@ jobs:
     needs: deploy-to-test
     defaults:
       run:
-        working-directory: terraform-example-deploy
+        working-directory: example-module
       
     name: Deploy to Prod
     environment: prod
