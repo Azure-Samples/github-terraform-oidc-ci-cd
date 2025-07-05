@@ -12,5 +12,5 @@ virtual_machine_sku = "Standard_B1ls"
 tags = {
   deployed_by = "terraform"
   environment = "dev"
-  owner       = "lavanack"
+  owner       = "lavanack_20250705"
 }
