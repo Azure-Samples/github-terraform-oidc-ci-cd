@@ -48,6 +48,8 @@ This sample includes the following features:
 - An Azure Subscription: [Free Account](https://azure.microsoft.com/en-gb/free/search/)
 - A GitHub Organization: [Free Organization](https://github.com/organizations/plan)
 
+> NOTE! A GitHub personal org is not supported, you must create a full GitHub org. A free one works fine, no licensing is required for this this lab.
+
 ### Installation
 
 - Clone the repository locally and then follow the Demo / Lab.
