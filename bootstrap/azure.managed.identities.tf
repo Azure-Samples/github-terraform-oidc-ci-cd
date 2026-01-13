@@ -15,7 +15,7 @@ locals {
     for template in env_value.required_templates : {
       composite_key                     = "${env_key}-${template}"
       user_assigned_managed_identity_id = module.user_assigned_managed_identity[env_key].resource_id
-      subject                           = "repository_owner_id:${data.github_organization.this.id}:repository_id:${github_repository.this.id}:environment:${env_key}:job_workflow_ref:${format(local.template_claim_structure, template)}"
+      subject                           = "repository_owner_id:${data.github_organization.this.id}:repository_id:${github_repository.this.repo_id}:environment:${env_key}:job_workflow_ref:${format(local.template_claim_structure, template)}"
     }
   ]]) : federated_credential.composite_key => federated_credential }
 }
