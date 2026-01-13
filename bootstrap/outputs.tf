@@ -13,3 +13,7 @@ output "tenant_id" {
 output "managed_identity_client_ids" {
   value = { for env_key, env_value in local.environment_split : env_key => module.user_assigned_managed_identity[env_key].client_id }
 }
+
+output "apply_approvers" {
+  value = local.approvers
+}

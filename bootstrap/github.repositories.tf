@@ -17,7 +17,7 @@ resource "github_repository" "this" {
 resource "github_actions_repository_oidc_subject_claim_customization_template" "this" {
   repository         = github_repository.this.name
   use_default        = false
-  include_claim_keys = ["repository", "environment", "job_workflow_ref"]
+  include_claim_keys = ["repository_owner_id", "repository_id", "environment", "job_workflow_ref"]
 }
 
 resource "github_repository" "template" {
