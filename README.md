@@ -84,19 +84,27 @@ The bootstrap implements a number of best practices for Terraform in Azure DevOp
 ### Generate a PAT (Personal Access Token) in GitHub
 
 1. Navigate to [github.com](https://github.com).
-1. Login and select the account icon in the top right and then `Settings`.
-1. Click `Developer settings`.
-1. Click `Personal access tokens` and select `Tokens (classic)`.
-1. Click `Generate new token` and select the `classic` option.
-1. Type `Demo_OIDC` into the `Note` field.
-1. Check these scopes:
-   1. `repo`
-   1. `workflow`
-   1. `admin:org`
-   1. `user`: `read:user`
-   1. `user`: `user:email`
-   1. `delete_repo`
-1. Click `Generate token`
+1. Click on your user icon in the top right and select `Settings`.
+1. Scroll down and click on `Developer Settings` in the left navigation.
+1. Click `Personal access tokens` in the left navigation and select `Fine-grained tokens`.
+1. Click `Generate new token` at the top.
+1. Enter `Demo_OIDC` in the `Token name` field.
+1. Alter the `Resource owner` drop down and select your organization.
+1. Alter the `Expiration` drop down and select `Custom`.
+1. Choose tomorrows date in the date picker.
+1. Alter the `Repository access` radio button and select `All repositories`.
+1. Add the following `Repository` permissions:
+    1. `Actions`: `Read and write`
+    1. `Administration`: `Read and write`
+    1. `Contents`: `Read and write`
+    1. `Environments`: `Read and write`
+    1. `Secrets`: `Read and write`
+    1. `Variables`: `Read and write`
+    1. `Workflows`: `Read and write`
+1. Add the following `Organization` permissions:
+    1. `Members`: `Read and write`
+    1. `Self-hosted runners`: `Read and write`  Only required if you plan to use Runner Groups at the organization level.
+1. Click `Generate token`.
 1. > IMPORTANT: Copy the token and save it somewhere.
 
 ### Clone the repo and setup your variables
@@ -112,7 +120,7 @@ The bootstrap implements a number of best practices for Terraform in Azure DevOp
     # You can omit this is you don't want to demo approvals on the production environment. Remove this whole approvers block to omit.
     approvers = {
       user1 = "<your_azure_devops_username>"
-    }  
+    }
     ```
 
     e.g.
@@ -144,7 +152,6 @@ The bootstrap implements a number of best practices for Terraform in Azure DevOp
 1. Open the Visual Studio Code Terminal and navigate the `bootstrap` folder.
 1. Run `az login -T "<tenant_id>"` and follow the prompts to login to Azure with your account.
 1. Run `az account show`. If you are not connected to you test subscription, change it by running `az account set --subscription "<subscription-id>"`
-1. Run `$env:ARM_SUBSCRIPTION_ID = $(az account show --query id -o tsv)` to set the subscription id required by azurerm provider v4.
 1. Run `$env:TF_VAR_personal_access_token = "<your_pat>"` to set the PAT you generated earlier.
 1. Run `terraform init`.
 1. Run `terraform plan -out tfplan`.

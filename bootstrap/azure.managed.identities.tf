@@ -21,11 +21,10 @@ locals {
 }
 
 resource "azurerm_federated_identity_credential" "this" {
-  for_each            = local.federated_credentials
-  parent_id           = each.value.user_assigned_managed_identity_id
-  name                = lower(replace("${var.organization_name}-${each.key}", ".", "-"))
-  resource_group_name = module.resource_group["identity"].name
-  audience            = [local.default_audience_name]
-  issuer              = local.github_issuer_url
-  subject             = each.value.subject
+  for_each  = local.federated_credentials
+  parent_id = each.value.user_assigned_managed_identity_id
+  name      = lower(replace("${var.organization_name}-${each.key}", ".", "-"))
+  audience  = [local.default_audience_name]
+  issuer    = local.github_issuer_url
+  subject   = each.value.subject
 }
