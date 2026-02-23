@@ -1,8 +1,8 @@
 locals {
   approvers = [for user in data.github_organization.this.users : {
-    id    = user.id
-    login = user.login
-    email = user.email
+    id         = user.id
+    login      = user.login
+    email      = user.email
     matched_on = contains(values(var.approvers), user.email) ? user.email : (contains(values(var.approvers), user.login) ? user.login : "none")
   } if contains(values(var.approvers), user.email) || contains(values(var.approvers), user.login)]
   invalid_approvers = setsubtract(values(var.approvers), local.approvers[*].matched_on)
