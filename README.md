@@ -44,8 +44,8 @@ This sample includes the following features:
 ### Prerequisites
 
 - HashiCorp Terraform CLI: [Download](https://www.terraform.io/downloads)
-- Azure CLI: [Download](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-windows?tabs=azure-cli#install-or-update)
-- An Azure Subscription: [Free Account](https://azure.microsoft.com/en-gb/free/search/)
+- Azure CLI: [Download](https://learn.microsoft.com/cli/azure/install-azure-cli-windows?tabs=azure-cli#install-or-update)
+- An Azure Subscription: [Free Account](https://azure.microsoft.com/pricing/purchase-options/azure-account?cid=msft_learn)
 - A GitHub Organization: [Free Organization](https://github.com/organizations/plan)
 
 > NOTE! A GitHub personal org is not supported, you must create a full GitHub org. A free one works fine, no licensing is required for this this lab.
